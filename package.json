@@ -1,0 +1,51 @@
+{
+  "name": "vertet",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "concurrently \"npm:watch\" \"npm:serve\"",
+    "watch": "nodemon -w src --exec 'npm run build'",
+    "build": "yarn build-flow && rollup --config rollup.config.js",
+    "build-flow": "rm -rf build && cp -r src build && yarn flow-remove-types src --out-dir build",
+    "serve": "servor dist --reload",
+    "watch-flow": "nodemon -w src --exec 'npm run build-flow'",
+    "build-data": "node src/versions/web/_build.js",
+    "repatch-world-english-bible": "yarn patch-package world-english-bible --exclude 'nothing'",
+    "repatch-servor": "yarn patch-package servor --exclude 'nothing'",
+    "reinstall-servor": "cd node_modules/servor && yarn",
+    "postinstall": "patch-package && yarn reinstall-servor"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.2",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@web/rollup-plugin-html": "^1.10.1",
+    "concurrently": "^7.0.0",
+    "flow-bin": "^0.172.0",
+    "flow-remove-types": "^2.172.0",
+    "nodemon": "^2.0.15",
+    "patch-package": "6.4.7",
+    "postinstall-postinstall": "2.1.0",
+    "prettier": "^2.0.5",
+    "rollup": "^2.69.0",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-terser": "^7.0.2",
+    "servor": "4.0.2",
+    "sqlite3": "^5.0.2"
+  },
+  "dependencies": {
+    "classnames": "^2.3.1",
+    "csz": "^1.2.0",
+    "es-kjv": "^1.0.2",
+    "es-react": "16.13.1",
+    "htm": "^3.1.0",
+    "mobx": "^6.4.1",
+    "mobx-react": "^7.3.0",
+    "mobx-utils": "^6.0.4",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "world-english-bible": "^1.0.0"
+  }
+}
