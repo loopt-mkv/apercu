@@ -40,6 +40,13 @@ import { html } from 'mobx-jsx/html'
 //   }
 // `
 
+// console.log('asd')
+
+/*
+ *
+ * console.log('asd')
+ * */
+
 const App = () => {
   return html` <div></div> `
   // return html`

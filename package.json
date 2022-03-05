@@ -24,9 +24,8 @@
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-replace": "^4.0.0",
     "@web/rollup-plugin-html": "^1.10.1",
+    "chalk": "^5.0.0",
     "concurrently": "^7.0.0",
-    "eslint": "^8.10.0",
-    "eslint-plugin-import": "^2.25.4",
     "flow-bin": "^0.173.0",
     "flow-remove-types": "^2.173.0",
     "husky": "^7.0.4",
@@ -56,7 +55,7 @@
     "world-english-bible": "^1.0.0"
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix",
+    "*.js": "node lint.js",
     "*.{js,css,md}": "prettier --write"
   }
 }
