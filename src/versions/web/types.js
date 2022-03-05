@@ -49,6 +49,13 @@ type WebLineText = {
 type WebBreak = { type: 'break' }
 type WebHeader = { type: 'header', value: string }
 
-type WebLineElement = WebParagraphStart | WebParagraphText | WebParagraphEnd | WebStanzaStart | WebLineText | WebBreak | WebHeader
+type WebLineElement =
+  | WebParagraphStart
+  | WebParagraphText
+  | WebParagraphEnd
+  | WebStanzaStart
+  | WebLineText
+  | WebBreak
+  | WebHeader
 
 export type BookWeb = Array<WebLineElement>

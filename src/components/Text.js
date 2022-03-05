@@ -1,6 +1,6 @@
 // @flow
 
-import type {HTM} from '../unpkg.js'
+import type { HTM } from '../unpkg.js'
 import { html, css } from '../unpkg.js'
 
 /*::

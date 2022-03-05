@@ -1,6 +1,6 @@
 // @flow
 
-import type {HTM} from '../unpkg.js'
+import type { HTM } from '../unpkg.js'
 import { html, css } from '../unpkg.js'
 
 /*::
@@ -14,9 +14,7 @@ const View = (props /*: Props*/): HTM => {
   const { className } = props
 
   return html`
-    <div class=${window.classNames(style, className)}>
-      ${props.children}
-    </div>
+    <div class=${window.classNames(style, className)}>${props.children}</div>
   `
 }
 

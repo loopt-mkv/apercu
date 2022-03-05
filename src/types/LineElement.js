@@ -11,7 +11,7 @@ type VerseLocation = {
   translation: string,
   book: string,
   chapter: number,
-  verse: number
+  verse: number,
 }
 
 export type LineElement = {
@@ -29,7 +29,7 @@ type Anchor = {
   // comment anchors {ae58bdc}
   id: string, // id appears in markdown.
   vloc: VerseLocation,
-  markdown: string
+  markdown: string,
 }
 
 // Data to client:

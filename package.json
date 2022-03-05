@@ -15,6 +15,7 @@
     "repatch-world-english-bible": "yarn patch-package world-english-bible --exclude 'nothing'",
     "repatch-servor": "yarn patch-package servor --exclude 'nothing'",
     "reinstall-servor": "cd node_modules/servor && yarn",
+    "prepare": "husky install",
     "postinstall": "patch-package && yarn reinstall-servor"
   },
   "devDependencies": {
@@ -24,12 +25,17 @@
     "@rollup/plugin-replace": "^4.0.0",
     "@web/rollup-plugin-html": "^1.10.1",
     "concurrently": "^7.0.0",
-    "flow-bin": "^0.172.0",
+    "eslint": "^8.10.0",
+    "eslint-plugin-import": "^2.25.4",
+    "flow-bin": "^0.173.0",
     "flow-remove-types": "^2.173.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.5",
+    "magic-string": "^0.26.1",
     "nodemon": "^2.0.15",
     "patch-package": "6.4.7",
     "postinstall-postinstall": "2.1.0",
-    "prettier": "^2.0.5",
+    "prettier": "^2.5.1",
     "rollup": "^2.69.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-terser": "^7.0.2",
@@ -48,5 +54,9 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "world-english-bible": "^1.0.0"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix",
+    "*.{js,css,md}": "prettier --write"
   }
 }
