@@ -2,12 +2,10 @@
 
 import type { LineElement } from '../types/LineElement.js'
 import type { HTM } from '../unpkg.js'
-import { html, css, mobxReact } from '../unpkg.js'
+import { html, css } from '../unpkg.js'
 import View from '../components/View.js'
 import Text from '../components/Text.js'
 import noteStore from '../stores/NoteStore.js'
-
-const { observer } = mobxReact
 
 function renderLineElement(lineElement: LineElement) {
   console.log('lineElement.markdown', lineElement.markdown)
@@ -35,4 +33,4 @@ const style = css`
 `
 
 // $FlowFixMe
-export default observer(Excerpt)
+export default Excerpt

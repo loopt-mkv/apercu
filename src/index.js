@@ -1,9 +1,12 @@
 // @flow
 
-import { React, ReactDOM, html } from './unpkg.js'
+// import { React, ReactDOM } from './unpkg.js'
+import { render } from 'mobx-jsx'
+import { html } from 'mobx-jsx/html'
 import App from './containers/App.js'
 
-ReactDOM.render(html` <${App} />`, document.body)
+// ReactDOM.render(html` <${App} />`, document.body)
+render(() => html`<${App} />`, document.body)
 
 // const Route = {
 //   '/': React.lazy(() => import('./routes/home/versions.js')),

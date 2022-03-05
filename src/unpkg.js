@@ -10,7 +10,6 @@ import css from 'csz'
 import * as mobx from 'mobx'
 // $FlowFixMe
 import * as kjv from 'es-kjv'
-import * as mobxReact from 'mobx-react'
 
 export type HTM = {
   type: string,
@@ -24,4 +23,4 @@ const html: (strings: Array<string>, ...keys: Array<any>) => HTM = htm.bind(
 
 mobxReact.observerBatching(ReactDOM.unstable_batchedUpdates)
 
-export { React, ReactDOM, htm, html, css, mobx, mobxReact, kjv }
+export { React, ReactDOM, htm, html, css, mobx, kjv }

@@ -5,12 +5,13 @@ import replace from '@rollup/plugin-replace'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import html from '@web/rollup-plugin-html'
 import sourcemaps from 'rollup-plugin-sourcemaps'
+import flow from './rollupFlow.js'
 
 export default (command) => {
   const isProduction = command.production
   delete command.production
   return {
-    input: 'build/index.html',
+    input: 'src/index.html',
     plugins: [
       json(),
       commonjs({ include: 'node_modules/**' }),
@@ -22,11 +23,12 @@ export default (command) => {
       nodeResolve(),
       html(),
       sourcemaps(),
+      flow(),
     ],
     output: {
       dir: 'dist',
       format: 'cjs',
-      sourcemap: true
+      sourcemap: true,
     },
   }
 }
