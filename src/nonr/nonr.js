@@ -33,19 +33,23 @@ export function nonr(init) {
   // Register any observables used inside a computable.
   let cachedValue
   const echoCache = () => cachedValue
-
-  activeObserver = {
-    recompute,
-    echoCache,
-    init,
-    setCache: (v) => {
-      cachedValue = v
-    },
-  }
-  // console.log('start', recompute)
+  
+  activeObserver = {observe: () => {
+      const nextValue = recompute()
+      const prevValue = echoCache()
+      if (
+        isDom(nextValue) &&
+        !!nextValue?.replaceWith &&
+        isDom(prevValue) &&
+        !!prevValue?.replaceWith
+      ) {
+        console.log('replaceWith')
+        prevValue.replaceWith(nextValue)
+        cachedValue = nextValue
+      }
+      return nextValue
+    }, init}
   cachedValue = recompute()
-  // console.log('end')
-  // console.log('cachedValue', cachedValue)
   activeObserver = null
 
   return new Proxy(echoCache, {
@@ -54,30 +58,8 @@ export function nonr(init) {
 
       if (activeObserver && !observerRegistry.has(activeObserver.init)) {
         // Each observer can only be registered once.
-        // console.log('register', activeObserver)
-        const observer = activeObserver // hold the value because activeObserver changes
-        observerRegistry.set(observer.init, true)
-        observers.push(() => {
-          const nextValue = observer.recompute()
-          const prevValue = observer.echoCache()
-          // console.log('value', value)
-          // console.log('cachedValue', cachedValue)
-          // console.log('isDom(value)', isDom(value))
-          // console.log('!!value?.replaceWith', !!value?.replaceWith)
-          // console.log('isDom(cachedValue)', isDom(cachedValue))
-          // console.log('!!cachedValue?.replaceWith', !!cachedValue?.replaceWith)
-          if (
-            isDom(nextValue) &&
-            !!nextValue?.replaceWith &&
-            isDom(prevValue) &&
-            !!prevValue?.replaceWith
-          ) {
-            console.log('replaceWith')
-            prevValue.replaceWith(nextValue)
-            observer.setCache(nextValue)
-          }
-          return nextValue
-        })
+        observerRegistry.set(activeObserver.init, true)
+        observers.push(activeObserver.observe)
       }
 
       if (prop === secret) {
@@ -106,21 +88,6 @@ export function nonr(init) {
     },
   })
 }
-
-// const obsA = nonr({
-//   counter: 0,
-// })
-//
-// const obsB = nonr(() => {
-//   console.log('obsA', obsA.counter)
-//   return obsA.counter + 1
-// })
-//
-// console.log('obsB', obsB())
-//
-// obsA.counter++
-
-// console.log('obsA', obsA.counter)
 
 const y = (
   name: string | function,
@@ -151,12 +118,6 @@ export const html: htmlTag = function (
   const f = htm.bind(y)
   const n = f(strings, ...keys)
   const el = n()
-
-  // for (const key of keys) {
-  //   console.log('key', key)
-  // }
-
-  // el.replaceWith()
 
   return el
 }
