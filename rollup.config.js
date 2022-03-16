@@ -20,14 +20,16 @@ export default (command) => {
         'process.env.NODE_ENV': isProduction ? '"production"' : '"development"',
         preventAssignment: true,
       }),
-      nodeResolve(),
+      nodeResolve({
+        browser: true,
+      }),
       html(),
       sourcemaps(),
       flow(),
     ],
     output: {
       dir: 'dist',
-      format: 'cjs',
+      format: 'es',
       sourcemap: true,
     },
   }
