@@ -1,17 +1,29 @@
 // @flow
 
-import { nonr, html } from './nonr/nonr.js'
+import css from 'csz'
+import { nonr } from './nonr/nonr.js'
+import { html } from './nonr/html.js'
+import View from './components/View.js'
+
+import Text from './components/Text.js'
 
 let count = nonr({
   counter: 0,
 })
 
-const View = nonr(() => html`<span>Count: ${count.counter}</span>`)
+const Counter = nonr(() => html`<${Text}>Count: ${count.counter}</${Text}>`)
+
+const styles = css`
+  display: flex;
+  flex-direction: column;
+
+  background-color: red;
+`
 
 const App = () => html`
-  <div>
-    <h2>counter using nonr</h2>
-    <${View} />
+  <${View} className=${styles}>
+    <span>counter using nonr</span>
+    <${Counter} />
     <button
       onclick=${() => {
         console.log('increment')
@@ -20,7 +32,7 @@ const App = () => html`
     >
       Click
     </button>
-  </div>
+  </View>
 `
 
 document.body?.appendChild(App())

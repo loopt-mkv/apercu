@@ -9,13 +9,14 @@ function h(name, props, ...children) {
   // console.log('children', children)
 
   if (typeof name === 'function') {
-    return name()
+    return name({
+      ...props,
+      children,
+    })
   }
 
   return y(name, props, ...children)
 }
 
-const html: (string: Array<string>, ...keys: Array<any>) => HTMLElement =
+export const html: (string: Array<string>, ...keys: Array<any>) => HTMLElement =
   htm.bind(h)
-
-export default html

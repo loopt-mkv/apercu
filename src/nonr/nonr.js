@@ -1,11 +1,7 @@
 // @flow
 
-import h from 'hyperscript'
-import htm from 'htm'
 import { nanoid } from 'nanoid'
 import isDom from 'is-dom'
-
-type NonrState = any
 
 const secret = nanoid()
 let activeObserver = null
@@ -19,7 +15,7 @@ function isPrimitive(test) {
   return test !== Object(test)
 }
 
-export function nonr(init) {
+export function nonr(init: any): any {
   const defaultFunction = () => {
     return isPrimitive(init) ? init : null
   }
@@ -33,7 +29,7 @@ export function nonr(init) {
   // Register any observables used inside a computable.
   let cachedValue
   const echoCache = () => cachedValue
-  
+
   activeObserver = {observe: () => {
       const nextValue = recompute()
       const prevValue = echoCache()
@@ -58,8 +54,9 @@ export function nonr(init) {
 
       if (activeObserver && !observerRegistry.has(activeObserver.init)) {
         // Each observer can only be registered once.
-        observerRegistry.set(activeObserver.init, true)
-        observers.push(activeObserver.observe)
+        const observer = activeObserver
+        observerRegistry.set(observer.init, true)
+        observers.push(observer.observe)
       }
 
       if (prop === secret) {
@@ -80,6 +77,10 @@ export function nonr(init) {
       // $FlowFixMe
       state[prop] = value
 
+      // todo
+      //  diallow setting within an observer.
+      //  eventually allow setting within an observer.
+
       for (const observer of observers) {
         observer()
       }
@@ -89,35 +90,37 @@ export function nonr(init) {
   })
 }
 
-const y = (
-  name: string | function,
-  props?: { [string]: any },
-  ...children: ?Array<any>
-): NonrState => {
-  if (typeof name === 'function') {
-    // This is for <${NestedComponent}/>.
-    return name()
-  }
+// const y = (
+//   name: string | function,
+//   props?: { [string]: any },
+//   ...children: ?Array<any>
+// ): NonrState => {
+//   if (typeof name === 'function') {
+//     // This is for <${NestedComponent}/>.
+//     return name()
+//   }
+//
+//   // Every element is associated with a nonr state via closure.
+//   const el = h(name, props, ...children)
+//   const n = nonr(() => {
+//     // console.log('el')
+//     return el
+//   })
+//   return n
+// }
 
-  // Every element is associated with a nonr state via closure.
-  const el = h(name, props, ...children)
-  const n = nonr(() => {
-    // console.log('el')
-    return el
-  })
-  return n
-}
+// type htmlTag = (strings: Array<string>, ...keys: Array<any>) => any
+//
+// export const html: htmlTag = function (
+//   strings: Array<string>,
+//   ...keys: Array<any>
+// ) {
+//   // Intercept the parsing of the tagged string.
+//   const f = htm.bind(y)
+//   const n = f(strings, ...keys)
+//   const el = typeof n === 'function' ? n() : n
+//
+//   return el
+// }
 
-type htmlTag = (strings: Array<string>, ...keys: Array<any>) => any
-
-export const html: htmlTag = function (
-  strings: Array<string>,
-  ...keys: Array<any>
-) {
-  // Intercept the parsing of the tagged string.
-  const f = htm.bind(y)
-  const n = f(strings, ...keys)
-  const el = n()
-
-  return el
-}
+// export const html = htm.bind(h)
