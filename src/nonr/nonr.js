@@ -30,7 +30,8 @@ export function nonr(init: any): any {
   let cachedValue
   const echoCache = () => cachedValue
 
-  activeObserver = {observe: () => {
+  activeObserver = {
+    observe: () => {
       const nextValue = recompute()
       const prevValue = echoCache()
       if (
@@ -44,7 +45,9 @@ export function nonr(init: any): any {
         cachedValue = nextValue
       }
       return nextValue
-    }, init}
+    },
+    init,
+  }
   cachedValue = recompute()
   activeObserver = null
 

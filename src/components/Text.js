@@ -6,10 +6,10 @@ import { html } from '../nonr/html.js'
 
 type Props = {
   className?: ?string,
-  children?: ?Array<HTMLElement>
+  children?: ?Array<HTMLElement>,
 }
 
-const Text = (props: Props = {}): HTMLElement => {
+const Text = (props: Props ): HTMLElement => {
   const { className } = props
 
   return html`
