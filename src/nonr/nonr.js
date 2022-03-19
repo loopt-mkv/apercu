@@ -3,19 +3,58 @@
 import { nanoid } from 'nanoid'
 import isDom from 'is-dom'
 
+export type Nonr = any
+
+type CreationContext = {
+  onChange: () => any,
+  registerCreation: (nonrObj: any) => any,
+  init: () => any,
+}
+
+type RecomputeContext = {
+  creations: Array<any>,
+  index: number,
+}
+
 const secret = nanoid()
-let activeObserver = null
+let creationContexts: Array<CreationContext> = []
+let recomputeContexts: Array<RecomputeContext> = []
+
+function peek<T>(a: Array<T>): ?T {
+  if (!a || !Array.isArray(a)) {
+    return null
+  }
+  return a[a.length - 1]
+}
 
 export function isNonr(obj: any): boolean {
   const isFunc = typeof obj === 'function'
   return isFunc && obj?.[secret]
 }
 
+export function fromPromise(p: Promise<any>): Nonr {
+  const state = nonr({
+    value: null,
+    state: 'pending',
+  })
+
+  p.then((value) => {
+    // console.log('mutating observable', value)
+    state._setShouldUpdate((prev, next) => {
+      return JSON.stringify(prev) !== JSON.stringify(next)
+    })
+    state.value = value
+    state.state = 'fulfilled'
+  })
+
+  return state
+}
+
 function isPrimitive(test) {
   return test !== Object(test)
 }
 
-export function nonr(init: any): any {
+export function nonr(init: any): Nonr {
   const defaultFunction = () => {
     return isPrimitive(init) ? init : null
   }
@@ -24,15 +63,40 @@ export function nonr(init: any): any {
   const recompute = typeof init === 'function' ? init : defaultFunction
   const state = typeof init === 'object' ? init : defaultState
   const observerRegistry = new WeakMap()
-  const observers = []
+  const dependents: Array<CreationContext> = []
+  const creations = []
+  let shouldUpdate = (prev, next) => prev !== next
+
+  const registerContextAsDependent = () => {
+    const createCtx: ?CreationContext = peek(creationContexts)
+    if (
+      createCtx &&
+      !observerRegistry.has(createCtx?.init || {}) // prevent duplicate registration
+    ) {
+      // Runs when one nonr obj is accessed during the creation of another nonr obj.
+      // We will register the obj being created as a dependent
+      // because its state depends on the state of obj being accessed.
+
+      if (createCtx) {
+        observerRegistry.set(createCtx.init, true)
+        dependents.push(createCtx)
+      }
+    }
+  }
 
   // Register any observables used inside a computable.
   let cachedValue
-  const echoCache = () => cachedValue
+  const echoCache = () => {
+    // console.log('cachedValue', cachedValue)
+    registerContextAsDependent()
+    return cachedValue
+  }
 
-  activeObserver = {
-    observe: () => {
+  creationContexts.push({
+    onChange: () => {
+      recomputeContexts.push({ index: 0, creations })
       const nextValue = recompute()
+      recomputeContexts.pop()
       const prevValue = echoCache()
       if (
         isDom(nextValue) &&
@@ -42,25 +106,34 @@ export function nonr(init: any): any {
       ) {
         console.log('replaceWith')
         prevValue.replaceWith(nextValue)
-        cachedValue = nextValue
       }
+
+      if (shouldUpdate(prevValue, nextValue)) {
+        cachedValue = nextValue
+        for (const ctx of dependents) {
+          // Whenever there is a change, notify dependents.
+          // todo: batch updates
+          //   Allow set to be called multiple times before callbacks are called.
+          ctx.onChange()
+        }
+      }
+
       return nextValue
     },
+    registerCreation: (nonrObj) => {
+      creations.push(nonrObj)
+    },
     init,
-  }
-  cachedValue = recompute()
-  activeObserver = null
+  })
+  // console.log('creationContexts', creationContexts, init)
+  // console.log('init', init)
+  cachedValue = recompute() // todo the first time this runs, it needs to record any nonr creations.
+  // console.warn('null out')
+  creationContexts.pop()
 
-  return new Proxy(echoCache, {
+  const proxy = new Proxy(echoCache, {
     get(parent, prop) {
-      // console.log('prop', prop)
-
-      if (activeObserver && !observerRegistry.has(activeObserver.init)) {
-        // Each observer can only be registered once.
-        const observer = activeObserver
-        observerRegistry.set(observer.init, true)
-        observers.push(observer.observe)
-      }
+      registerContextAsDependent()
 
       if (prop === secret) {
         return true
@@ -73,24 +146,66 @@ export function nonr(init: any): any {
       ) {
         return echoCache()
       }
+      if (prop === '_setShouldUpdate') {
+        return (func: (prev: any, next: any) => boolean) => {
+          shouldUpdate = func
+        }
+      }
 
       return state?.[prop]
     },
     set(obj, prop, value) {
-      // $FlowFixMe
-      state[prop] = value
+      const currentValue = state[prop]
+      if (shouldUpdate(currentValue, value)) {
+        // $FlowFixMe
+        state[prop] = value
+        // console.log('set', prop, value, dependents)
 
-      // todo
-      //  diallow setting within an observer.
-      //  eventually allow setting within an observer.
+        // todo
+        //  diallow setting within an observer.
+        //  eventually allow setting within an observer.
 
-      for (const observer of observers) {
-        observer()
+        for (const ctx of dependents) {
+          // Whenever there is a change, notify dependents.
+          // todo: batch updates
+          //   Allow set to be called multiple times before callbacks are called.
+          ctx.onChange()
+        }
       }
-
       return true
     },
   })
+
+  const createCtx = peek(creationContexts)
+  // console.log('createCtx', createCtx)
+  // console.log('init', init)
+  if (createCtx) {
+    // This runs during the first call of the recompute function.
+    // Any nonr objects created during a recompute
+    // need to be blocked, and instead merged into the
+    // the matching original object.
+    // the observer is part of the nonr which should remember creations made within its context.
+    createCtx?.registerCreation(proxy)
+    // console.warn('registerCreation', createCtx.init, init)
+  }
+
+  const recomputeCtx = peek(recomputeContexts)
+  // console.log('recomputeCtx', recomputeCtx)
+  // console.log('creations', creations)
+  if (recomputeCtx) {
+    // This runs when a subsequent recompute calls creates a nonr obj.
+    // Instead of returning a new nonr obj in this case,
+    // we need to return the same nonr obj that was created the first time recompute function was called.
+    const item = recomputeCtx.creations[recomputeCtx.index]
+    recomputeCtx.index++
+    if (item) {
+      // console.warn('blocked nonr obj')
+      return item
+    }
+  }
+
+  console.warn('created new nonr obj', init)
+  return proxy
 }
 
 // const y = (

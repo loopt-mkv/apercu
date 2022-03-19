@@ -8,6 +8,8 @@ import View from './View.js'
 type Props = {
   className?: ?string,
   children?: ?Array<HTMLElement>,
+  left: any,
+  right: any
 }
 
 const DoublePane = (props: Props ): HTMLElement => {

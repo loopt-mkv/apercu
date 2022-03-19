@@ -14,14 +14,14 @@ export async function getVerse(input: {
 }): Promise<?string> {
   const { translation, book, chapter, verse } = input
 
-  console.log('book', book)
-  console.log('chapter', chapter)
-  console.log('verse', verse)
+  // console.log('book', book)
+  // console.log('chapter', chapter)
+  // console.log('verse', verse)
 
   const web = await getNormalized()
   const value = web[book]?.[chapter]?.[verse]
 
-  console.log('value', value)
+  // console.log('value', value)
 
   return value
 }
